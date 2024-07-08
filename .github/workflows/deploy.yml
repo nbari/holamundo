@@ -34,6 +34,14 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
+          registry-type: private
+          skip-logout: false
+        env:
+          ACTIONS_STEP_DEBUG: true
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
 
       - name: Build and push Docker image
         env:
@@ -50,5 +58,5 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
