@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -52,11 +52,10 @@ jobs:
           docker build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Download Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Update ECS service
+        env:
+          CLUSTER_NAME: hello-world-cluster
+          SERVICE_NAME: hello-world-service
+          IMAGE_URL: ${{ steps.login-ecr.outputs.registry }}/holamundo:latest
+        run: |
+          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment

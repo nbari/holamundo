@@ -1,0 +1,32 @@
+name: Terraform Infrastructure
+
+on:
+  push:
+    paths:
+      - 'terraform/**'
+
+jobs:
+  apply_infrastructure:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::350898059902:role/GitActions
+          audience: sts.amazonaws.com
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
